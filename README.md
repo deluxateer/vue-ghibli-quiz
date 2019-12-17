@@ -1,5 +1,9 @@
 # vue-ghibli-quiz
 
+Studio Ghibli Film Trivia Quiz. Made for practice and testing my Vue knowledge.
+
+Data from the [Studio Ghibli API](https://ghibliapi.herokuapp.com/).
+
 ## Project setup
 ```
 npm install
