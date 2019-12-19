@@ -3,23 +3,11 @@
   <h2 class="text-center text-4xl font-bold mb-4">Question </h2>
   <p class="text-center md:text-right font-bold">Correct: <span class="text-green-500">{{score}}</span> / {{totalQuestions}}</p>
   <div class="question-group">
-    <p class="question my-4">Miyazaki was the director for which of these movies?</p>
+    <p class="question my-4">{{currQuestionText}}</p>
     <form id="answer-form">
-      <div class="answer-choice-group">
-        <input class="mb-4" type="radio" id="choice1" value="movie a" v-model="answer" name="answer-choice">
-        <label for="choice1" class="ml-3">movie a</label>
-      </div>
-      <div class="answer-choice-group">
-        <input class="mb-4" type="radio" id="choice2" value="movie b" v-model="answer" name="answer-choice">
-        <label for="choice2" class="ml-3">movie b</label>
-      </div>
-      <div class="answer-choice-group">
-        <input class="mb-4" type="radio" id="choice3" value="movie c" v-model="answer" name="answer-choice">
-        <label for="choice3" class="ml-3">movie c</label>
-      </div>
-      <div class="answer-choice-group">
-        <input class="mb-4" type="radio" id="choice4" value="movie d" v-model="answer" name="answer-choice">
-        <label for="choice4" class="ml-3">movie d</label>
+      <div v-for="(choice, index) in choices" :key="index" class="answer-choice-group">
+        <input type="radio" name="answer-choice" :id="'choice' + index" class="mb-4" :value="choice" v-model="answer">
+        <label :for="'choice' + index" class="ml-3">{{choice}}</label>
       </div>
       <div class="text-right">
         <input class="font-bold bg-green-500 hover:bg-green-400 text-white p-4 rounded" type="submit" value="Answer">
@@ -30,7 +18,7 @@
 </template>
 
 <script>
-// 1. [vehicle] appeared in which of these films?
+//* 1. [vehicle] appeared in which of these films?
 // 2. which of these films was directed and produced by the same person?
 // 3. [director] directed which of these films?
 // 4. which of these cats appeared in [film]?
@@ -49,11 +37,25 @@ export default {
       locations: [],
       species: [],
       vehicles: [],
-      choices: [],
       errors: [],
       questions: [],
+      currQuestion: 0,
       answer: '',
     }
+  },
+  computed: {
+    currQuestionText() {
+      if(this.questions.length !== 0) {
+        return this.questions[this.currQuestion].questionText;
+      }
+      return null;
+    },
+    choices() {
+      if(this.questions.length !== 0) {
+        return this.questions[this.currQuestion].choices;
+      }
+      return null;
+    },
   },
   props: ['score', 'totalQuestions'],
   methods: {
@@ -122,11 +124,7 @@ export default {
       };
     }
   },
-  // beforeCreate(){console.log('beforeCreate called')},
-  // created(){console.log('created called')},
-  // beforeMount(){console.log('beforeMount called')},
   async mounted() {
-    // console.log('mounted called');
     // fetch all initial Studio Ghibli data
     await this.fetchCategoryData('films');
     await this.fetchCategoryData('people');
@@ -134,10 +132,7 @@ export default {
     await this.fetchCategoryData('species');
     await this.fetchCategoryData('vehicles');
 
-    // console.log('mounted continued')
     this.questions.push(this.whichFilmVehicleAppears());
   },
-  // beforeUpdate(){console.log('beforeUpdate called')},
-  // updated(){console.log('updated called')}
 }
 </script>
