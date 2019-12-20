@@ -9,8 +9,8 @@
     <div class="question-group">
       <p class="question my-4">{{currQuestionText}}</p>
       <form @submit.prevent="handleSubmit" id="answer-form">
-        <div v-for="(choice, index) in choices" :key="index" class="answer-choice-group">
-          <input type="radio" name="answer-choice" :id="'choice' + index" class="mb-4" :value="choice" v-model="answer">
+        <div v-for="(choice, index) in choices" :key="index" class="answer-choice-group mb-4">
+          <input type="radio" name="answer-choice" :id="'choice' + index" :value="choice" v-model="answer">
           <label :for="'choice' + index" class="ml-3">{{choice}}</label>
         </div>
         <div class="text-right">
