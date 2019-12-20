@@ -1,18 +1,23 @@
 <template>
-<div id="questions" class="w-full lg:px-10">
-  <h2 class="text-center text-4xl font-bold mb-4">Question </h2>
-  <p class="text-center md:text-right font-bold">Correct: <span class="text-green-500">{{score}}</span> / {{totalQuestions}}</p>
-  <div class="question-group">
-    <p class="question my-4">{{currQuestionText}}</p>
-    <form id="answer-form">
-      <div v-for="(choice, index) in choices" :key="index" class="answer-choice-group">
-        <input type="radio" name="answer-choice" :id="'choice' + index" class="mb-4" :value="choice" v-model="answer">
-        <label :for="'choice' + index" class="ml-3">{{choice}}</label>
-      </div>
-      <div class="text-right">
-        <input class="font-bold bg-green-500 hover:bg-green-400 text-white p-4 rounded" type="submit" value="Answer">
-      </div>
-    </form>
+<div class="questions-container w-full lg:px-10">
+  <div v-if="loading">
+    <spinner></spinner>
+  </div>
+  <div v-else class="questions">
+    <h2 class="text-center text-4xl font-bold mb-4">Question {{currQuestion + 1}}</h2>
+    <p class="text-center md:text-right font-bold">Correct: <span class="text-green-500">{{score}}</span> / {{totalQuestions}}</p>
+    <div class="question-group">
+      <p class="question my-4">{{currQuestionText}}</p>
+      <form @submit.prevent="handleSubmit" id="answer-form">
+        <div v-for="(choice, index) in choices" :key="index" class="answer-choice-group">
+          <input type="radio" name="answer-choice" :id="'choice' + index" class="mb-4" :value="choice" v-model="answer">
+          <label :for="'choice' + index" class="ml-3">{{choice}}</label>
+        </div>
+        <div class="text-right">
+          <input :disabled="!answer" class="font-bold text-white p-4 rounded" :class="[answer ? 'bg-green-500 hover:bg-green-400' : 'bg-gray-400']" :style="[answer ? {'cursor': 'pointer'} : {'cursor': 'not-allowed'}]" type="submit" value="Answer">
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 </template>
@@ -27,8 +32,14 @@
 // 7. The film that featured [location] was released on what year?
 // 8. Which of these people did not appear in [film]?
 
+// @ is an alias to /src
+import spinner from '@/components/Spinner.vue';
+
 export default {
   name: 'Questions',
+  components: {
+    spinner
+  },
   data() {
     return {
       baseUrl: 'https://ghibliapi.herokuapp.com',
@@ -39,8 +50,8 @@ export default {
       vehicles: [],
       errors: [],
       questions: [],
-      currQuestion: 0,
-      answer: '',
+      answer: null,
+      loading: true,
     }
   },
   computed: {
@@ -57,7 +68,7 @@ export default {
       return null;
     },
   },
-  props: ['score', 'totalQuestions'],
+  props: ['score', 'totalQuestions', 'currQuestion'],
   methods: {
     async fetchCategoryData(category) {
       try {
@@ -85,6 +96,18 @@ export default {
       }
 
       return array;
+    },
+    handleSubmit() {
+      const { answer, questions, currQuestion } = this;
+
+      const payload = {
+        answer,
+        correctAnswer: questions[currQuestion].correctAnswer,
+      };
+
+      this.$emit('verify-answer', payload);
+
+      this.answer = null;
     },
     whichFilmVehicleAppears() {
       const {
@@ -133,6 +156,9 @@ export default {
     await this.fetchCategoryData('vehicles');
 
     this.questions.push(this.whichFilmVehicleAppears());
+    this.questions.push(this.whichFilmVehicleAppears());
+
+    this.loading = false;
   },
 }
 </script>

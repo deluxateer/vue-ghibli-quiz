@@ -6,18 +6,15 @@
     <p>However, we will quiz you on categories related to the movies too, so you'll need to bring your game up if you want to score well here. There are <b>{{ totalQuestions }}</b> questions in total.</p>
     <p class="font-bold text-center text-lg">Are you ready?</p>
     <div class="text-center">
-      <router-link to="/questions" :score="score" :totalQuestions="totalQuestions" class="inline-block mx-auto font-bold bg-green-500 hover:bg-green-400 text-white p-4 rounded">Yeah, Let's Start!</router-link>
+      <router-link to="/questions" :score="score" :totalQuestions="totalQuestions" :currQuestion="currQuestion" class="inline-block mx-auto font-bold bg-green-500 hover:bg-green-400 text-white p-4 rounded">Yeah, Let's Start!</router-link>
     </div>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-// import HelloWorld from '@/components/HelloWorld.vue'
-
 export default {
   name: 'home',
-  props: ['score', 'totalQuestions']
+  props: ['score', 'totalQuestions', 'currQuestion']
 }
 </script>
 
