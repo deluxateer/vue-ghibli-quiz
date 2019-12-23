@@ -12,7 +12,7 @@ export default {
   data() {
     return {
       score: 0,
-      totalQuestions: 9,
+      totalQuestions: 10,
       currQuestion: 0,
     }
   },

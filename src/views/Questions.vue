@@ -24,7 +24,7 @@
 
 <script>
 //* 1. [vehicle] appeared in which of these films?
-// 2. which of these films was directed and produced by the same person?
+//* 2. which of these films was directed and produced by the same person?
 // 3. [director] directed which of these films?
 // 4. which of these cats appeared in [film]?
 // 5. [people] appeared in which film?
@@ -86,7 +86,35 @@ export default {
     parseIdFromUrl(url) {
       return url.split('/').pop();
     },
-    shuffleArray(array) {
+    getWrongAnswers(correctAnswer, possibleCorrectAnswers = null) {
+      const {
+        films,
+        generateRandomNum,
+        shuffleAnswers
+        } = this;
+
+      let choicesData = [correctAnswer];
+      // get 3 wrong answers
+      while(choicesData.length < 4) {
+        const randomFilm = films[generateRandomNum(films.length)];
+        // is it already among our selected choices?
+        if(!choicesData.find(choice => choice.id === randomFilm.id)) {
+          if (possibleCorrectAnswers) {
+            // is it not another possible correct answer?
+            if(!possibleCorrectAnswers.find(answer => answer.id === randomFilm.id)) {
+              choicesData.push(randomFilm);
+            }
+          }
+          else {
+            choicesData.push(randomFilm);
+          }
+        }
+      }
+      choicesData = shuffleAnswers(choicesData);
+
+      return choicesData;
+    },
+    shuffleAnswers(array) {
       for(let i = array.length - 1; i >= 0; i--) {
         const j = this.generateRandomNum(i);
         // swap elements
@@ -106,7 +134,6 @@ export default {
       };
 
       this.$emit('verify-answer', payload);
-
       this.answer = null;
     },
     whichFilmVehicleAppears() {
@@ -115,7 +142,7 @@ export default {
         parseIdFromUrl,
         films,
         generateRandomNum,
-        shuffleArray
+        getWrongAnswers
         } = this;
 
       // select a random vehicle
@@ -126,16 +153,8 @@ export default {
       const filmWithVehicleId = parseIdFromUrl(selectedVehicle.films);
       const correctAnswerData = films.find(film => film.id === filmWithVehicleId);
 
-      let choicesData = [correctAnswerData];
       // get 3 wrong answers
-      while(choicesData.length < 4) {
-        // select a random film that's not already among our selected choices
-        const randomFilm = films[generateRandomNum(films.length)];
-        if(!choicesData.find(choice => choice.id === randomFilm.id)) {
-          choicesData.push(randomFilm);
-        }
-      }
-      choicesData = shuffleArray(choicesData);
+      const choicesData = getWrongAnswers(correctAnswerData);
 
       // extract the choices' text
       const choices = choicesData.map(choiceData => choiceData.title);
@@ -145,7 +164,33 @@ export default {
         choices,
         correctAnswer: correctAnswerData.title
       };
-    }
+    },
+    whichSameDirectorAndProducer() {
+      const {
+        vehicles,
+        parseIdFromUrl,
+        films,
+        generateRandomNum,
+        getWrongAnswers
+        } = this;
+      // construct the question
+      const questionText = `Which of these films was directed and produced by the same person?`;
+      // lookup the correct answer and choose a film
+      const correctAnswers = films.filter(film => film.director === film.producer);
+      const correctAnswer = correctAnswers[generateRandomNum(correctAnswers.length)];
+
+      // get 3 wrong answers
+      const choicesData = getWrongAnswers(correctAnswer, correctAnswers);
+
+      // extract the choices' text
+      const choices = choicesData.map(choiceData => choiceData.title);
+
+      return {
+        questionText,
+        choices,
+        correctAnswer: correctAnswer.title
+      };
+    },
   },
   async mounted() {
     // fetch all initial Studio Ghibli data
@@ -156,8 +201,10 @@ export default {
     await this.fetchCategoryData('vehicles');
 
     for(let i = 0; i < this.totalQuestions; i++) {
-      this.questions.push(this.whichFilmVehicleAppears());
+      // this.questions.push(this.whichFilmVehicleAppears());
+      this.questions.push(this.whichSameDirectorAndProducer());
     }
+
 
     this.loading = false;
   },
