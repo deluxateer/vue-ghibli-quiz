@@ -25,8 +25,8 @@
 <script>
 //* 1. [vehicle] appeared in which of these films?
 //* 2. which of these films was directed and produced by the same person?
-// 3. [director] directed which of these films?
-// 4. which of these cats appeared in [film]?
+//* 3. [director] directed which of these films?
+//* 4. which of these cats appeared in [film]?
 // 5. [people] appeared in which film?
 // 6. [location] was a place that appeared in which film?
 // 7. The film that featured [location] was released on what year?
@@ -86,9 +86,8 @@ export default {
     parseIdFromUrl(url) {
       return url.split('/').pop();
     },
-    getWrongAnswers(correctAnswer, possibleCorrectAnswers = null) {
+    getWrongAnswers(correctAnswer, category, possibleCorrectAnswers = null) {
       const {
-        films,
         generateRandomNum,
         shuffleAnswers
         } = this;
@@ -96,17 +95,17 @@ export default {
       let choicesData = [correctAnswer];
       // get 3 wrong answers
       while(choicesData.length < 4) {
-        const randomFilm = films[generateRandomNum(films.length)];
+        const randomItem = category[generateRandomNum(category.length)];
         // is it already among our selected choices?
-        if(!choicesData.find(choice => choice.id === randomFilm.id)) {
+        if(!choicesData.find(choice => choice.id === randomItem.id)) {
           if (possibleCorrectAnswers) {
             // is it not another possible correct answer?
-            if(!possibleCorrectAnswers.find(answer => answer.id === randomFilm.id)) {
-              choicesData.push(randomFilm);
+            if(!possibleCorrectAnswers.find(answer => answer.id === randomItem.id)) {
+              choicesData.push(randomItem);
             }
           }
           else {
-            choicesData.push(randomFilm);
+            choicesData.push(randomItem);
           }
         }
       }
@@ -151,10 +150,10 @@ export default {
       const questionText = `${selectedVehicle.name} appeared in which of these films?`;
       // lookup the correct answer
       const filmWithVehicleId = parseIdFromUrl(selectedVehicle.films);
-      const correctAnswerData = films.find(film => film.id === filmWithVehicleId);
+      const correctAnswer = films.find(film => film.id === filmWithVehicleId);
 
       // get 3 wrong answers
-      const choicesData = getWrongAnswers(correctAnswerData);
+      const choicesData = getWrongAnswers(correctAnswer, films);
 
       // extract the choices' text
       const choices = choicesData.map(choiceData => choiceData.title);
@@ -162,7 +161,7 @@ export default {
       return {
         questionText,
         choices,
-        correctAnswer: correctAnswerData.title
+        correctAnswer: correctAnswer.title
       };
     },
     whichSameDirectorAndProducer() {
@@ -180,7 +179,7 @@ export default {
       const correctAnswer = correctAnswers[generateRandomNum(correctAnswers.length)];
 
       // get 3 wrong answers
-      const choicesData = getWrongAnswers(correctAnswer, correctAnswers);
+      const choicesData = getWrongAnswers(correctAnswer, films, correctAnswers);
 
       // extract the choices' text
       const choices = choicesData.map(choiceData => choiceData.title);
@@ -208,7 +207,7 @@ export default {
       const correctAnswer = correctAnswers[generateRandomNum(correctAnswers.length)];
 
       // get 3 wrong answers
-      const choicesData = getWrongAnswers(correctAnswer, correctAnswers);
+      const choicesData = getWrongAnswers(correctAnswer, films, correctAnswers);
 
       // extract the choices' text
       const choices = choicesData.map(choiceData => choiceData.title);
@@ -218,10 +217,62 @@ export default {
         choices,
         correctAnswer: correctAnswer.title
       };
+    },
+    whichCatAppearedInFilm() {
+      const {
+        parseIdFromUrl,
+        species,
+        people,
+        films,
+        generateRandomNum,
+        getWrongAnswers
+        } = this;
+
+      // find all cats
+      const catUrls = species.find(speciesData => speciesData.name === 'Cat').people;
+      // choose a cat and find its film
+      const chosenCatId = parseIdFromUrl(catUrls[generateRandomNum(catUrls.length)]);
+      const chosenCat = people.find(person => person.id === chosenCatId);
+      const chosenCatFilmUrl = chosenCat.films[0];
+      const chosenCatFilm = films.find(film => film.url == chosenCatFilmUrl).title;
+      // construct the question
+      const questionText = `Which of these cats appeared in the film ${chosenCatFilm}?`;
+
+      const cats = catUrls.map(catUrl => people.find(person => person.url === catUrl));
+
+      // find other possible correct answers
+      const correctAnswers = cats.filter(cat => {
+        // ignore already chosen cat
+        if (cat.id !== chosenCat.id) {
+          // look at all films the cat appeared in
+          // if one is in common with the chosen cat, stop searching;
+          // this cat is a possible choice
+          let sameFilm = false;
+          for(let i = 0; i < cat.films.length; i++) {
+            if(cat.films[i] === chosenCatFilmUrl) {
+              sameFilm = true;
+              break;
+            }
+          }
+          return sameFilm;
+        }
+        return false;
+      });
+
+      // get 3 wrong answers
+      const choicesData = getWrongAnswers(chosenCat, cats, correctAnswers);
+      // // extract the choices' text
+      const choices = choicesData.map(choiceData => choiceData.name);
+
+      return {
+        questionText,
+        choices,
+        correctAnswer: chosenCat.name
+      };
     }
   },
   async mounted() {
-    const { fetchCategoryData, questions, totalQuestions, generateRandomNum, whichSameDirectorAndProducer, whichFilmVehicleAppears, directorOfWhichFilm } = this;
+    const { fetchCategoryData, questions, totalQuestions, generateRandomNum, whichSameDirectorAndProducer, whichFilmVehicleAppears, directorOfWhichFilm, whichCatAppearedInFilm } = this;
 
     // fetch all initial Studio Ghibli data
     await fetchCategoryData('films');
@@ -233,12 +284,14 @@ export default {
     const questionTypes = [
       whichFilmVehicleAppears,
       whichSameDirectorAndProducer,
-      directorOfWhichFilm
+      directorOfWhichFilm,
+      whichCatAppearedInFilm
     ];
 
     for(let i = 0; i < totalQuestions; i++) {
       // add a random question
       questions.push(questionTypes[generateRandomNum(questionTypes.length)]());
+      // questions.push(whichCatAppearedInFilm());
     }
 
     this.loading = false;
