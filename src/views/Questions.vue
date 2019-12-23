@@ -122,7 +122,7 @@ export default {
       const selectedVehicle = vehicles[generateRandomNum(vehicles.length)];
       // construct the question
       const questionText = `${selectedVehicle.name} appeared in which of these films?`;
-      // calculate the correct answer
+      // lookup the correct answer
       const filmWithVehicleId = parseIdFromUrl(selectedVehicle.films);
       const correctAnswerData = films.find(film => film.id === filmWithVehicleId);
 
@@ -155,8 +155,9 @@ export default {
     await this.fetchCategoryData('species');
     await this.fetchCategoryData('vehicles');
 
-    this.questions.push(this.whichFilmVehicleAppears());
-    this.questions.push(this.whichFilmVehicleAppears());
+    for(let i = 0; i < this.totalQuestions; i++) {
+      this.questions.push(this.whichFilmVehicleAppears());
+    }
 
     this.loading = false;
   },

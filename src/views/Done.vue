@@ -6,7 +6,7 @@
     <p v-if="percentage === '100.00'">You got a perfect score! You're a rockstar!</p>
     <p v-else>It seems you can do even better. You know, practice makes perfect so why not take it again :)</p>
     <p>Anyway, thank you for taking the quiz! We hoped you enjoyed it.</p>
-    <router-link to="/" @click.native="$emit('replay')" class="inline-block mx-auto font-bold bg-green-500 hover:bg-green-400 text-white p-4 rounded">Take the Quiz Again</router-link>
+    <button @click="$emit('replay')" class="inline-block mx-auto font-bold bg-green-500 hover:bg-green-400 text-white p-4 rounded">Take the Quiz Again</button>
   </div>
 </template>
 

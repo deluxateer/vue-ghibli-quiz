@@ -12,7 +12,7 @@ export default {
   data() {
     return {
       score: 0,
-      totalQuestions: 2,
+      totalQuestions: 9,
       currQuestion: 0,
     }
   },
@@ -24,6 +24,7 @@ export default {
         this.score = this.score + 1;
       }
 
+      // is the quiz over?
       if(this.currQuestion + 1 === totalQuestions) {
         this.$router.push('done');
       } else {
@@ -31,9 +32,9 @@ export default {
       }
     },
     resetScore() {
-      console.log('im called')
       this.score = 0;
       this.currQuestion = 0;
+      this.$router.push('/');
     }
   }
 }
