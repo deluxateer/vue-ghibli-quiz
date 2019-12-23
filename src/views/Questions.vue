@@ -173,9 +173,9 @@ export default {
         generateRandomNum,
         getWrongAnswers
         } = this;
-      // construct the question
+
       const questionText = `Which of these films was directed and produced by the same person?`;
-      // lookup the correct answer and choose a film
+      // lookup the correct answers and choose a film
       const correctAnswers = films.filter(film => film.director === film.producer);
       const correctAnswer = correctAnswers[generateRandomNum(correctAnswers.length)];
 
@@ -191,9 +191,37 @@ export default {
         correctAnswer: correctAnswer.title
       };
     },
+    directorOfWhichFilm() {
+      const {
+        parseIdFromUrl,
+        films,
+        generateRandomNum,
+        getWrongAnswers
+        } = this;
+
+      // select a random director
+      const chosenDirector = films[generateRandomNum(films.length)].director;
+      // construct the question
+      const questionText = `${chosenDirector} directed which of these films?`;
+      // lookup the correct answers and choose a film
+      const correctAnswers = films.filter(film => film.director === chosenDirector);
+      const correctAnswer = correctAnswers[generateRandomNum(correctAnswers.length)];
+
+      // get 3 wrong answers
+      const choicesData = getWrongAnswers(correctAnswer, correctAnswers);
+
+      // extract the choices' text
+      const choices = choicesData.map(choiceData => choiceData.title);
+
+      return {
+        questionText,
+        choices,
+        correctAnswer: correctAnswer.title
+      };
+    }
   },
   async mounted() {
-    const { fetchCategoryData, questions, totalQuestions, generateRandomNum, whichSameDirectorAndProducer, whichFilmVehicleAppears } = this;
+    const { fetchCategoryData, questions, totalQuestions, generateRandomNum, whichSameDirectorAndProducer, whichFilmVehicleAppears, directorOfWhichFilm } = this;
 
     // fetch all initial Studio Ghibli data
     await fetchCategoryData('films');
@@ -204,12 +232,13 @@ export default {
 
     const questionTypes = [
       whichFilmVehicleAppears,
-      whichSameDirectorAndProducer
+      whichSameDirectorAndProducer,
+      directorOfWhichFilm
     ];
 
     for(let i = 0; i < totalQuestions; i++) {
       // add a random question
-      questions.push(questionTypes[generateRandomNum(questionTypes.length)]())
+      questions.push(questionTypes[generateRandomNum(questionTypes.length)]());
     }
 
     this.loading = false;

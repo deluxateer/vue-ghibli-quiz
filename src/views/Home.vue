@@ -25,7 +25,6 @@ export default {
 p {
   margin-bottom: 1.5rem;
 }
-
 a {
   transition: background-color 0.5s;
 }
