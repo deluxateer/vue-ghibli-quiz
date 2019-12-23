@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="h-full">
     <div class="container mx-auto h-full bg-white px-10 py-10 rounded-lg shadow-xl overflow-y-auto">
-      <router-view @verify-answer="verifyAnswer" @replay="resetScore" :score="score" :totalQuestions="totalQuestions" :currQuestion="currQuestion" />
+      <router-view @verify-answer="verifyAnswer" @replay="resetQuiz" @reset-score="resetScore" :score="score" :totalQuestions="totalQuestions" :currQuestion="currQuestion" />
     </div>
   </div>
 </template>
@@ -34,6 +34,9 @@ export default {
     resetScore() {
       this.score = 0;
       this.currQuestion = 0;
+    },
+    resetQuiz() {
+      this.resetScore();
       this.$router.push('/');
     }
   }

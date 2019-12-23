@@ -193,18 +193,24 @@ export default {
     },
   },
   async mounted() {
+    const { fetchCategoryData, questions, totalQuestions, generateRandomNum, whichSameDirectorAndProducer, whichFilmVehicleAppears } = this;
+
     // fetch all initial Studio Ghibli data
-    await this.fetchCategoryData('films');
-    await this.fetchCategoryData('people');
-    await this.fetchCategoryData('locations');
-    await this.fetchCategoryData('species');
-    await this.fetchCategoryData('vehicles');
+    await fetchCategoryData('films');
+    await fetchCategoryData('people');
+    await fetchCategoryData('locations');
+    await fetchCategoryData('species');
+    await fetchCategoryData('vehicles');
 
-    for(let i = 0; i < this.totalQuestions; i++) {
-      // this.questions.push(this.whichFilmVehicleAppears());
-      this.questions.push(this.whichSameDirectorAndProducer());
+    const questionTypes = [
+      whichFilmVehicleAppears,
+      whichSameDirectorAndProducer
+    ];
+
+    for(let i = 0; i < totalQuestions; i++) {
+      // add a random question
+      questions.push(questionTypes[generateRandomNum(questionTypes.length)]())
     }
-
 
     this.loading = false;
   },

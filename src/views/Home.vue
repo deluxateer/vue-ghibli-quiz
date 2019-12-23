@@ -14,7 +14,10 @@
 <script>
 export default {
   name: 'home',
-  props: ['score', 'totalQuestions', 'currQuestion']
+  props: ['score', 'totalQuestions', 'currQuestion'],
+  mounted() {
+    this.$emit('reset-score');
+  }
 }
 </script>
 
