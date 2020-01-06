@@ -31,9 +31,7 @@
 // 6. [location] was a place that appeared in which film?
 // 7. The film that featured [location] was released on what year?
 // 8. Which of these people did not appear in [film]?
-// TODO: move all data fetching to app lvl component, since they only need to be fetched once
 
-// @ is an alias to /src
 import spinner from '@/components/Spinner.vue';
 
 export default {
@@ -43,13 +41,6 @@ export default {
   },
   data() {
     return {
-      baseUrl: 'https://ghibliapi.herokuapp.com',
-      films: [],
-      people: [],
-      locations: [],
-      species: [],
-      vehicles: [],
-      errors: [],
       questions: [],
       answer: null,
       loading: true,
@@ -69,18 +60,17 @@ export default {
       return null;
     },
   },
-  props: ['score', 'totalQuestions', 'currQuestion'],
+  props: [
+    'score',
+    'totalQuestions',
+    'currQuestion',
+    'films',
+    'people',
+    'locations',
+    'species',
+    'vehicles'
+    ],
   methods: {
-    async fetchCategoryData(category) {
-      try {
-        const rawData = await fetch(`${this.baseUrl}/${category}`);
-        const parsedData = await rawData.json();
-        this[category] = parsedData;
-      }
-      catch(error) {
-        this.errors.push(error);
-      }
-    },
     generateRandomNum(max) {
       return Math.floor(Math.random() * Math.floor(max));
     },
@@ -303,14 +293,7 @@ export default {
     }
   },
   async mounted() {
-    const { fetchCategoryData, questions, totalQuestions, generateRandomNum, whichSameDirectorAndProducer, whichFilmVehicleAppears, directorOfWhichFilm, whichCatAppearedInFilm, personAppearedWhichFilm } = this;
-
-    // fetch all initial Studio Ghibli data
-    await fetchCategoryData('films');
-    await fetchCategoryData('people');
-    await fetchCategoryData('locations');
-    await fetchCategoryData('species');
-    await fetchCategoryData('vehicles');
+    const { questions, totalQuestions, generateRandomNum, whichSameDirectorAndProducer, whichFilmVehicleAppears, directorOfWhichFilm, whichCatAppearedInFilm, personAppearedWhichFilm } = this;
 
     const questionTypes = [
       whichFilmVehicleAppears,
