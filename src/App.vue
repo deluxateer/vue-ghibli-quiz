@@ -21,14 +21,14 @@ export default {
       const { score, $router, totalQuestions } = this;
 
       if(payload.answer === payload.correctAnswer) {
-        this.score = this.score + 1;
+        this.score++;
       }
 
       // is the quiz over?
       if(this.currQuestion + 1 === totalQuestions) {
         this.$router.push('done');
       } else {
-        this.currQuestion = this.currQuestion + 1;
+        this.currQuestion++;
       }
     },
     resetScore() {

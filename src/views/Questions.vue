@@ -27,10 +27,11 @@
 //* 2. which of these films was directed and produced by the same person?
 //* 3. [director] directed which of these films?
 //* 4. which of these cats appeared in [film]?
-// 5. [people] appeared in which film?
+//* 5. [people] appeared in which film?
 // 6. [location] was a place that appeared in which film?
 // 7. The film that featured [location] was released on what year?
 // 8. Which of these people did not appear in [film]?
+// TODO: move all data fetching to app lvl component, since they only need to be fetched once
 
 // @ is an alias to /src
 import spinner from '@/components/Spinner.vue';
@@ -269,10 +270,40 @@ export default {
         choices,
         correctAnswer: chosenCat.name
       };
+    },
+    personAppearedWhichFilm() {
+      const {
+        parseIdFromUrl,
+        people,
+        films,
+        generateRandomNum,
+        getWrongAnswers
+        } = this;
+
+      // select a random person
+      const chosenPerson = people[generateRandomNum(people.length)];
+      // construct the question
+      const questionText = `${chosenPerson.name} appeared in which of these films?`;
+      // lookup the correct answer
+      const correctAnswerIds = chosenPerson.films.map(filmUrl => parseIdFromUrl(filmUrl));
+      const correctAnswers = correctAnswerIds.map(filmId => films.find(film => film.id === filmId));
+      const correctAnswer = correctAnswers[generateRandomNum(correctAnswers.length)];
+
+      // get 3 wrong answers
+      const choicesData = getWrongAnswers(correctAnswer, films, correctAnswers);
+
+      // extract the choices' text
+      const choices = choicesData.map(choiceData => choiceData.title);
+
+      return {
+        questionText,
+        choices,
+        correctAnswer: correctAnswer.title
+      };
     }
   },
   async mounted() {
-    const { fetchCategoryData, questions, totalQuestions, generateRandomNum, whichSameDirectorAndProducer, whichFilmVehicleAppears, directorOfWhichFilm, whichCatAppearedInFilm } = this;
+    const { fetchCategoryData, questions, totalQuestions, generateRandomNum, whichSameDirectorAndProducer, whichFilmVehicleAppears, directorOfWhichFilm, whichCatAppearedInFilm, personAppearedWhichFilm } = this;
 
     // fetch all initial Studio Ghibli data
     await fetchCategoryData('films');
@@ -285,13 +316,13 @@ export default {
       whichFilmVehicleAppears,
       whichSameDirectorAndProducer,
       directorOfWhichFilm,
-      whichCatAppearedInFilm
+      whichCatAppearedInFilm,
+      personAppearedWhichFilm
     ];
 
     for(let i = 0; i < totalQuestions; i++) {
       // add a random question
       questions.push(questionTypes[generateRandomNum(questionTypes.length)]());
-      // questions.push(whichCatAppearedInFilm());
     }
 
     this.loading = false;
